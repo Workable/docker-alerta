@@ -53,6 +53,10 @@ jobs:
           push: false
           tags: Workable/alerta-base:${{ steps.container-info.outputs.image-tag }}
           provenance: false
+          build-args: |
+            BUILD_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+            RELEASE=9.0.4
+            VERSION=${{ steps.container-info.outputs.image-tag }}
 
       # DISTRIBUTION OF SRE IMAGE
       - name: Login to sre registry
