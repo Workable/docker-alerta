@@ -1,6 +1,6 @@
-FROM python:3.9-slim-trixie
+FROM python:3.9-slim-bookworm
 
-ENV PYTHONUNBUFFERED 1
+ENV PYTHONUNBUFFERED=1
 ENV PIP_DISABLE_PIP_VERSION_CHECK=1
 ENV PIP_NO_CACHE_DIR=1
 
@@ -53,8 +53,8 @@ RUN apt-get update && \
     apt-get -y autoremove && \
     rm -rf /var/lib/apt/lists/*
 
-RUN curl -fsSL https://nginx.org/keys/nginx_signing.key | apt-key add - && \
-    echo "deb https://nginx.org/packages/debian/ buster nginx" | tee /etc/apt/sources.list.d/nginx.list && \
+RUN curl -fsSL https://nginx.org/keys/nginx_signing.key | gpg --dearmor -o /usr/share/keyrings/nginx-archive-keyring.gpg && \
+    echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] https://nginx.org/packages/debian/ bookworm nginx" | tee /etc/apt/sources.list.d/nginx.list && \
     apt-get update && \
     apt-get install -y --no-install-recommends \
     nginx && \
@@ -63,11 +63,11 @@ RUN curl -fsSL https://nginx.org/keys/nginx_signing.key | apt-key add - && \
     rm -rf /var/lib/apt/lists/*
 
 # hadolint ignore=DL3008
-RUN curl -fsSL https://www.mongodb.org/static/pgp/server-4.2.asc | apt-key add - && \
-    echo "deb https://repo.mongodb.org/apt/debian buster/mongodb-org/4.2 main" | tee /etc/apt/sources.list.d/mongodb-org-4.2.list && \
+RUN curl -fsSL https://www.mongodb.org/static/pgp/server-7.0.asc | gpg --dearmor -o /usr/share/keyrings/mongodb-archive-keyring.gpg && \
+    echo "deb [signed-by=/usr/share/keyrings/mongodb-archive-keyring.gpg] https://repo.mongodb.org/apt/debian bookworm/mongodb-org/7.0 main" | tee /etc/apt/sources.list.d/mongodb-org-7.0.list && \
     apt-get update && \
     apt-get install -y --no-install-recommends \
-    mongodb-org-shell && \
+    mongodb-mongosh && \
     apt-get -y clean && \
     apt-get -y autoremove && \
     rm -rf /var/lib/apt/lists/*
@@ -80,7 +80,7 @@ RUN pip install --no-cache-dir pip virtualenv jinja2 && \
     /venv/bin/pip install --no-cache-dir --upgrade setuptools && \
     /venv/bin/pip install --no-cache-dir --requirement /app/requirements.txt && \
     /venv/bin/pip install --no-cache-dir --requirement /app/requirements-docker.txt
-ENV PATH $PATH:/venv/bin
+ENV PATH=$PATH:/venv/bin
 
 RUN /venv/bin/pip install alerta==${CLIENT_VERSION} alerta-server==${SERVER_VERSION}
 COPY install-plugins.sh /app/install-plugins.sh
@@ -91,9 +91,9 @@ ADD https://github.com/alerta/alerta-webui/releases/download/v${WEBUI_VERSION}/a
 RUN tar zxvf /tmp/webui.tar.gz -C /tmp && \
     mv /tmp/dist /web
 
-ENV ALERTA_SVR_CONF_FILE /app/alertad.conf
-ENV ALERTA_CONF_FILE /app/alerta.conf
-ENV ALERTA_WEB_CONF_FILE /web/config.json
+ENV ALERTA_SVR_CONF_FILE=/app/alertad.conf
+ENV ALERTA_CONF_FILE=/app/alerta.conf
+ENV ALERTA_WEB_CONF_FILE=/web/config.json
 
 COPY config/templates/app/ /app
 COPY config/templates/web/ /web
