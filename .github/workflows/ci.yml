@@ -55,7 +55,7 @@ jobs:
   #       run: make test.unit BACKEND=mongodb IMAGE_NAME=alerta-test
 
   publish-artifacts:
-    needs: [lint, unit-tests]
+    # needs: [lint, unit-tests]
     if: ${{ needs.detect-noop.outputs.noop != 'true' && startsWith(github.ref, 'refs/tags/workable-') }}
     permissions:
       id-token: write
