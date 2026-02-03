@@ -59,7 +59,13 @@ jobs:
             VERSION=${{ steps.container-info.outputs.image-tag }}
 
       # DISTRIBUTION OF SRE IMAGE
+      - name: Skip SRE registry push
+        if: ${{ secrets.SRE_GCR_SA == '' }}
+        run: |
+          echo "::warning title=SRE Registry Push Skipped::The SRE_GCR_SA secret is missing. Skipping image push to SRE registry."
+
       - name: Login to sre registry
+        if: ${{ secrets.SRE_GCR_SA != '' }}
         uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
         with:
           registry: us-docker.pkg.dev
@@ -67,6 +73,7 @@ jobs:
           password: ${{ secrets.SRE_GCR_SA }}
 
       - name: Push image to sre registry
+        if: ${{ secrets.SRE_GCR_SA != '' }}
         env:
           REGISTRY: us-docker.pkg.dev/sre-artifacts-20e4/gcr.io
         run: |
@@ -75,7 +82,13 @@ jobs:
           docker push ${{ env.REGISTRY }}/alerta-base:${{ steps.container-info.outputs.image-tag }}
 
       # DISTRIBUTION OF STAGING IMAGE
+      - name: Skip Staging registry push
+        if: ${{ secrets.STAGING_GCR_SA == '' }}
+        run: |
+          echo "::warning title=Staging Registry Push Skipped::The STAGING_GCR_SA secret is missing. Skipping image push to Staging registry."
+
       - name: Login to staging registry
+        if: ${{ secrets.STAGING_GCR_SA != '' }}
         uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
         with:
           registry: us-docker.pkg.dev
@@ -83,6 +96,7 @@ jobs:
           password: ${{ secrets.STAGING_GCR_SA }}
 
       - name: Push image to staging registry
+        if: ${{ secrets.STAGING_GCR_SA != '' }}
         env:
           REGISTRY: us-docker.pkg.dev/staging-artifacts-786a/gcr.io
         run: |
@@ -90,18 +104,25 @@ jobs:
             ${{ env.REGISTRY }}/alerta-base:${{ steps.container-info.outputs.image-tag }}
           docker push ${{ env.REGISTRY }}/alerta-base:${{ steps.container-info.outputs.image-tag }}
 
-      # # DISTRIBUTION OF PRODUCTION IMAGE
-      # - name: Login to production registry
-      #   uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
-      #   with:
-      #     registry: us-docker.pkg.dev
-      #     username: _json_key
-      #     password: ${{ secrets.PRODUCTION_GCR_SA }}
+      # DISTRIBUTION OF PRODUCTION IMAGE
+      - name: Skip Production registry push
+        if: ${{ secrets.PRODUCTION_GCR_SA == '' }}
+        run: |
+          echo "::warning title=Production Registry Push Skipped::The PRODUCTION_GCR_SA secret is missing. Skipping image push to Production registry."
 
-      # - name: Push image to production registry
-      #   env:
-      #     REGISTRY: us-docker.pkg.dev/production-artifacts-0b0d/gcr.io
-      #   run: |
-      #     docker tag Workable/alerta-base:${{ steps.container-info.outputs.image-tag }} \
-      #       ${{ env.REGISTRY }}/alerta-base:${{ steps.container-info.outputs.image-tag }}
-      #     docker push ${{ env.REGISTRY }}/alerta-base:${{ steps.container-info.outputs.image-tag }}
+      - name: Login to production registry
+        if: ${{ secrets.PRODUCTION_GCR_SA != '' }}
+        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
+        with:
+          registry: us-docker.pkg.dev
+          username: _json_key
+          password: ${{ secrets.PRODUCTION_GCR_SA }}
+
+      - name: Push image to production registry
+        if: ${{ secrets.PRODUCTION_GCR_SA != '' }}
+        env:
+          REGISTRY: us-docker.pkg.dev/production-artifacts-0b0d/gcr.io
+        run: |
+          docker tag Workable/alerta-base:${{ steps.container-info.outputs.image-tag }} \
+            ${{ env.REGISTRY }}/alerta-base:${{ steps.container-info.outputs.image-tag }}
+          docker push ${{ env.REGISTRY }}/alerta-base:${{ steps.container-info.outputs.image-tag }}
