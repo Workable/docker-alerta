@@ -116,18 +116,18 @@ jobs:
             ${{ env.REGISTRY }}/alerta-base:${{ steps.container-info.outputs.image-tag }}
           docker push ${{ env.REGISTRY }}/alerta-base:${{ steps.container-info.outputs.image-tag }}
 
-      # DISTRIBUTION OF PRODUCTION IMAGE
-      - name: Login to production registry
-        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
-        with:
-          registry: us-docker.pkg.dev
-          username: _json_key
-          password: ${{ secrets.PRODUCTION_GCR_SA }}
+      # # DISTRIBUTION OF PRODUCTION IMAGE
+      # - name: Login to production registry
+      #   uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
+      #   with:
+      #     registry: us-docker.pkg.dev
+      #     username: _json_key
+      #     password: ${{ secrets.PRODUCTION_GCR_SA }}
 
-      - name: Push image to production registry
-        env:
-          REGISTRY: us-docker.pkg.dev/production-artifacts-0b0d/gcr.io
-        run: |
-          docker tag Workable/alerta-base:${{ steps.container-info.outputs.image-tag }} \
-            ${{ env.REGISTRY }}/alerta-base:${{ steps.container-info.outputs.image-tag }}
-          docker push ${{ env.REGISTRY }}/alerta-base:${{ steps.container-info.outputs.image-tag }}
+      # - name: Push image to production registry
+      #   env:
+      #     REGISTRY: us-docker.pkg.dev/production-artifacts-0b0d/gcr.io
+      #   run: |
+      #     docker tag Workable/alerta-base:${{ steps.container-info.outputs.image-tag }} \
+      #       ${{ env.REGISTRY }}/alerta-base:${{ steps.container-info.outputs.image-tag }}
+      #     docker push ${{ env.REGISTRY }}/alerta-base:${{ steps.container-info.outputs.image-tag }}
